@@ -1,6 +1,6 @@
 /* @flow */
 
-import { isValidElement } from 'react';
+import { isValidElement, isForwardRef } from 'react';
 import { prettyPrint } from '@base2/pretty-print-object';
 import sortObject from './sortObject';
 import parseReactElement from './../parser/parseReactElement';
@@ -21,7 +21,7 @@ export default (
     transform: (currentObj, prop, originalResult) => {
       const currentValue = currentObj[prop];
 
-      if (currentValue && isValidElement(currentValue)) {
+      if (isValidReactElement(currentValue)) {
         return formatTreeNode(
           parseReactElement(currentValue, options),
           true,
@@ -51,4 +51,17 @@ export default (
   return stringifiedValue
     .replace(/\t/g, spacer(1, options.tabStop))
     .replace(/\n([^$])/g, `\n${spacer(lvl + 1, options.tabStop)}$1`);
+};
+
+const isValidReactElement = currentValue => {
+  if (!currentValue) {
+    return false;
+  }
+  if (isValidElement(currentValue)) {
+    return true;
+  }
+  if (isForwardRef(currentValue)) {
+    return true;
+  }
+  return false;
 };
